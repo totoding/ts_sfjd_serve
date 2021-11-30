@@ -1,16 +1,21 @@
 import "reflect-metadata";
 import './db/db';
+import { getManager,getRepository } from "typeorm";
 import { User } from './db/admin/User';
-import { getConnection } from "typeorm";
 
-const a = getConnection()
-const b = new User()
-b.name = "a"
-b.password = "2"
-a.manager.save(b)
-	.then(user => {
-		console.log(user)
-	})
+// setTimeout(() => {
+// 	const user = new User()
+// 		user.name = "admin1"
+// 		user.password ="1230"
+// 		getManager().save(user)
+// }, 2000)
+// conenct
+// .then(() => {
+// 	const user = new User()
+// 	user.name = "admin"
+// 	user.password ="1230"
+// 	getManager().save(user)
+// })
 // import { User } from './entities/admin/User';
 // import { validate } from 'class-validator';
 // import { plainToClass } from 'class-transformer';
