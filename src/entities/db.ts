@@ -4,25 +4,30 @@
 
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import { Buffer } from 'buffer';
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 import { User as AdminUser } from './admin/User';
 
 (async () => {
 	try {
-		const resp = await fs.readFile(path.resolve(__dirname, "../../sysConfig.confs"))
+		const configBuffer: Buffer = await fs.readFile(path.resolve(__dirname, "../../sysConfig.conf"))
+		const configString: string = configBuffer.toString()
+		const config: any[] = configString.split("\r\n").map(item => {
+			const items = item.split("=")
+			return { [items[0]]: items[1] }
+		})
 		createConnection({
 			type: "mysql",
-			host: "101.43.53.71",
+			host: config[1].host,
 			port: 3306,
-			username: "root",
-			password: "Hny_158405",
+			username: config[2].username,
+			password: config[3].password,
 			database: "sfjd",
 			entities: [AdminUser],
 			synchronize: true,
-			logging: false,
+			logging: true,
 		})
-		
 	} catch (error) {
 		throw new Error(error)
 	}
