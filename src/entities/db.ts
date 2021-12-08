@@ -8,6 +8,7 @@ import { Buffer } from 'buffer';
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 import { User as AdminUser } from './admin/User';
+import { Category as AdminCategory } from './admin/Category';
 
 (async () => {
 	try {
@@ -24,7 +25,7 @@ import { User as AdminUser } from './admin/User';
 			username: config[2].username,
 			password: config[3].password,
 			database: "sfjd",
-			entities: [AdminUser],
+			entities: [AdminUser, AdminCategory],
 			synchronize: true,
 			logging: true,
 		})

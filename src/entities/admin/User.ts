@@ -1,11 +1,9 @@
 
-import { SearchCondition } from './../common/SearchCondition';
-
-
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, InsertResult, DeleteDateColumn, DeleteResult, UpdateResult, Like, getRepository } from "typeorm"
+import { SearchCondition } from './../common/SearchCondition'
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, InsertResult, DeleteDateColumn, DeleteResult, UpdateResult, Like, getRepository } from "typeorm"
 import { IsNotEmpty } from 'class-validator'
-import { Type } from 'class-transformer';
-import { Base } from '../common/BaseEntity';
+import { Type } from 'class-transformer'
+import { Base } from '../common/BaseEntity'
 
 interface ParamsType {
 	username?: string
@@ -50,7 +48,6 @@ export class User extends Base {
 	deteleTime?: string
 
 	static findRealNameById(id: number): Promise<User | undefined> {
-
 		return getRepository(this).findOne({
 			select: ["realname"],
 			where: { id }

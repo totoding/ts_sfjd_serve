@@ -6,10 +6,12 @@ const app = new Koa()
 app.use(cors())
 app.use(koaBody({	multipart: true }))
 
-import { route as adminRouter } from "./routes/admin/UserRoute"
+import { route as adminUserRouter } from "./routes/admin/UserRoute"
+import { route as adminCategoryRouter } from "./routes/admin/CategoryRoute"
 import { tokenMiddleware } from './middleware/token'
 app.use(tokenMiddleware)
-app.use(adminRouter)
+app.use(adminUserRouter)
+app.use(adminCategoryRouter)
 
 
 app.listen(3000, () => {
