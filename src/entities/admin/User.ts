@@ -1,28 +1,42 @@
 
-/**
- * @description 
- */
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, InsertResult, DeleteDateColumn, DeleteResult, UpdateResult } from "typeorm"
+import { SearchCondition } from './../common/SearchCondition';
+
+
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, InsertResult, DeleteDateColumn, DeleteResult, UpdateResult, Like, getRepository } from "typeorm"
 import { IsNotEmpty } from 'class-validator'
+import { Type } from 'class-transformer';
+import { Base } from '../common/BaseEntity';
+
+interface ParamsType {
+	username?: string
+	password?: string
+	realname?: string,
+	avatar?: string
+}
 
 @Entity("admin_user")
-export class User extends BaseEntity {
+export class User extends Base {
 
-	@PrimaryGeneratedColumn()
+	@PrimaryGeneratedColumn("uuid")
+	@Type(() => Number)
 	id: number
 
 	@Column({ length: 100 })
 	@IsNotEmpty({ message: "用户名不能为空" })
+	@Type(() => String)
 	username: string
 
 	@Column({ length: 100 })
 	@IsNotEmpty({ message: "密码不能为空" })
+	@Type(() => String)
 	password: string
 
 	@Column({ length: 100, nullable: true })
+	@Type(() => String)
 	realname?: string
 
 	@Column({ length: 100, nullable: true })
+	@Type(() => String)
 	avatar?: string
 
 	@CreateDateColumn()
@@ -32,47 +46,59 @@ export class User extends BaseEntity {
 	updateTime?: string
 
 	@DeleteDateColumn()
+	@Type(() => String)
 	deteleTime?: string
 
 	static findRealNameById(id: number): Promise<User | undefined> {
-		return this.createQueryBuilder("AdminUser")
-			.select(["AdminUser.realname"])
-			.where("AdminUser.id = :id", { id })
-			.getOne()
+
+		return getRepository(this).findOne({
+			select: ["realname"],
+			where: { id }
+		})
 	}
 
-	static findUserByUserInfo({ password, username }: User): Promise<User | undefined> {
-		return this.createQueryBuilder("AdminUser")
-			.select(["AdminUser.id", "AdminUser.realname"])
-			.where("AdminUser.username = :username", { username })
-			.andWhere("AdminUser.password = :password", { password })
-			.getOne()
+	static findByUserInfo(userInfo: ParamsType): Promise<User | undefined> {
+		const where = {}
+		for (const key in userInfo) {
+			where[key] = userInfo[key]
+		}
+		return getRepository(this).findOne({
+			select: ["id", "username"],
+			where: [where]
+		})
 	}
 
-	static addUser(values: User): Promise<InsertResult> {
-		return this.createQueryBuilder("AdminUser")
-			.insert()
-			.into(User)
-			.values(values)
-			.execute()
+	static add({ username, password, realname, avatar }: User): Promise<InsertResult> {
+		return getRepository(this).insert({ username, password, realname, avatar })
 	}
 
-	static upDateUserById(id: number, values: User): Promise<UpdateResult> {
-		return this.createQueryBuilder("AdminUser")
+	static upDateById(id: number, values: User): Promise<UpdateResult> {
+		return getRepository(this).createQueryBuilder("AdminUser")
 			.update(User)
 			.set(values)
-			.where("id = id", { id })
+			.where("id = :id", { id: id })
 			.execute()
 	}
 
-	static removeUserById(id: number): Promise<DeleteResult> {
-		return this.createQueryBuilder("AdminUser")
+	static removeById(id: number): Promise<DeleteResult> {
+		return getRepository(this).createQueryBuilder("AdminUser")
 			.delete()
 			.where("id = :id", { id })
 			.execute()
 	}
 
-	static findUsersByFilter(callback: () => Promise<User | undefined>): Promise<User | undefined> {
-		return callback()
+	static getColomnsBySearchCondition(condition: SearchCondition): Promise<[User[], number]> {
+		const where: any[] = []
+		if (condition.keywords) {
+			const realname = Like(`%${condition.keywords}%`)
+			where.push({ realname })
+		}
+		return getRepository(this).findAndCount({
+			select: ["id", "realname"],
+			where,
+			skip: (condition.page - 1) * condition.limit,
+			take: condition.limit,
+		})
 	}
 }
+
